@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 import { useAppSelector, useAppDispatch } from '../features/hooks';
 import { switchNearby, editRadius } from '../features/mapFeatureSlice';
 import markerImg from '../assets/location.png'
+import { io } from "socket.io-client";
+
 
 const containerStyle = {
   width: '100%',
@@ -29,6 +31,30 @@ const markerCircleStyle = {
 
 
 export default function MapComponent() {
+
+  useEffect(() => {
+    const socket = io("http://localhost:8080");
+    console.log("socket");
+
+    let socketId: string | undefined;
+
+    socket.on("connect", () => {
+      socketId = socket.id;
+      console.log("Connected!", socketId);
+    });
+
+    socket.emit("test", { message: "test msg" });
+
+    socket.on("disconnect", () => {
+      console.log("Disconnected!", socketId);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
+
 
   const isNearby = useAppSelector((state) => state.isNearby);
   const radius = useAppSelector((state) => state.radius);
